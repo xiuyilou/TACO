@@ -1,7 +1,7 @@
 # TACO
 
-This folder contains a minimal anonymous implementation of Tail-Aware Credit Calibration (TACO) for GRPO-style policy optimization.
-
+Implementation of When Implausible Tokens Get Reinforced: Tail-Aware
+Credit Calibration for LLM Reinforcement Learning
 ## What was changed
 
 - `verl/trainer/ppo/core_algos.py`
