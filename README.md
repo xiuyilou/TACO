@@ -23,8 +23,7 @@
 
 ## 🎉 Updates
 
-- **[MM/DD/YYYY]** Released the paper on arXiv. See [here](YOUR_ARXIV_LINK).
-- **[MM/DD/YYYY]** Initial open-source release of TACO built on top of [verl](https://github.com/volcengine/verl).
+- **[07/05/2026]** Initial open-source release of TACO built on top of [verl](https://github.com/volcengine/verl).
 
 ## 💡 About
 
@@ -38,32 +37,6 @@ TACO uses two local signals:
 - **Local entropy**: entropy provides a context-dependent reference for whether a low-probability token is actually surprising under the current distribution.
 
 Based on these signals, TACO suppresses unreliable positive credit while preserving useful rare-token exploration.
-
-## 🔍 Method Overview
-
-For each sampled token, TACO estimates a tail-risk score:
-
-```math
-r_{\mathrm{tail}} = -\log p - H + \log(\alpha)
-````
-
-where:
-
-* `p` is the sampled-token probability,
-* `H` is the local next-token entropy,
-* `alpha` controls tail-risk strictness.
-
-The token weight is then computed as:
-
-```math
-w =
-\begin{cases}
-1, & r_{\mathrm{tail}} \le 0, \\
-1 - \lambda(1 - \exp(-r_{\mathrm{tail}})), & r_{\mathrm{tail}} > 0.
-\end{cases}
-```
-
-Only tokens from trajectories with positive sequence-level advantage are reweighted. Non-positive advantages are preserved unchanged.
 
 ## 🚀 Installation
 
@@ -149,27 +122,6 @@ The example training entrypoint is:
 run.sh
 ```
 
-## 🗂️ Repository Layout
-
-```text
-taco/
-├── run.sh
-├── verl/
-│   ├── trainer/
-│   │   └── ppo/
-│   │       └── core_algos.py          # TACO tail-risk score and credit calibration
-│   ├── workers/
-│   │   ├── actor/
-│   │   │   └── dp_actor.py            # apply TACO before PPO update
-│   │   └── config/
-│   │       └── actor.py               # TACO config arguments
-│   └── trainer/
-│       └── config/
-│           └── actor/
-│               └── actor.yaml         # TACO config defaults
-└── README.md
-```
-
 ## 🧩 What Was Changed
 
 * `verl/trainer/ppo/core_algos.py`
@@ -203,22 +155,3 @@ taco/
 ## 🫡 Acknowledgements
 
 This project builds on [verl](https://github.com/volcengine/verl), an open-source reinforcement learning framework for large language models.
-
-## 💬 Citation
-
-If you find TACO helpful, please cite our paper:
-
-```bibtex
-@article{lou2026implausible,
-  title   = {When Implausible Tokens Get Reinforced: Tail-Aware Credit Calibration for LLM Reinforcement Learning},
-  author  = {TODO},
-  journal = {arXiv preprint arXiv:TODO},
-  year    = {2026}
-}
-```
-
-## License
-
-[Apache License 2.0](LICENSE).
-
-```
