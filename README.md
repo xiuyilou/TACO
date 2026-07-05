@@ -13,10 +13,8 @@
 
 <p>
   <a href="#-about">About</a> ·
-  <a href="#-installation">Installation</a> ·
   <a href="#-training-with-taco">Training with TACO</a> ·
   <a href="#-implementation">Implementation</a> ·
-  <a href="#-citation">Citation</a>
 </p>
 
 </div>
@@ -38,20 +36,6 @@ TACO uses two local signals:
 
 Based on these signals, TACO suppresses unreliable positive credit while preserving useful rare-token exploration.
 
-## 🚀 Installation
-
-```bash
-git clone YOUR_GITHUB_LINK taco
-cd taco
-
-conda create -n taco python=3.10 -y
-conda activate taco
-
-pip install -e verl
-pip install flash-attn --no-build-isolation
-```
-
-Please follow the original [verl](https://github.com/volcengine/verl) installation instructions if your environment requires additional dependencies.
 
 ## 🧪 Training with TACO
 
