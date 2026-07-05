@@ -13,8 +13,8 @@
 
 <p>
   <a href="#-about">About</a> ·
-  <a href="#-training-with-taco">Training with TACO</a> ·
   <a href="#-implementation">Implementation</a> ·
+  <a href="#-training-with-taco">Training with TACO</a> ·
 </p>
 
 </div>
@@ -36,26 +36,6 @@ TACO uses two local signals:
 
 Based on these signals, TACO suppresses unreliable positive credit while preserving useful rare-token exploration.
 
-
-## 🧪 Training with TACO
-
-TACO can be enabled through environment variables before launching training:
-
-```bash
-export TACO_ENABLE=true
-export TACO_ALPHA=0.01
-export TACO_LAMBDA=0.9
-
-bash run.sh
-```
-
-### TACO-specific parameters
-
-| Parameter     | Description                                                                                              | Default |
-| ------------- | -------------------------------------------------------------------------------------------------------- | ------- |
-| `TACO_ENABLE` | Whether to enable TACO credit calibration                                                                | `true`  |
-| `TACO_ALPHA`  | Tail-risk strictness. Smaller values are more conservative; larger values identify more tokens as risky. | `0.01`  |
-| `TACO_LAMBDA` | Maximum suppression strength for high-risk positive credit.                                              | `0.9`   |
 
 ## 🛠️ Implementation
 
@@ -83,8 +63,6 @@ else:
     calibrated_advantage = advantage
 ```
 
-Non-positive advantages are preserved unchanged to maintain the suppression signal from failed trajectories.
-
 ### `verl/workers/actor/dp_actor.py`
 
 TACO is applied using current-policy `log_prob` and `entropy` before the PPO clipped surrogate update.
@@ -98,43 +76,25 @@ verl/workers/config/actor.py
 verl/trainer/config/actor/actor.yaml
 ```
 
-### Training script
+## 🧪 Training with TACO
 
-The example training entrypoint is:
+TACO can be enabled through environment variables before launching training:
 
-```text
-run.sh
+```bash
+export TACO_ENABLE=true
+export TACO_ALPHA=0.01
+export TACO_LAMBDA=0.9
+
+bash run.sh
 ```
 
-## 🧩 What Was Changed
+### TACO-specific parameters
 
-* `verl/trainer/ppo/core_algos.py`
-
-  * Implements the TACO tail-risk score:
-
-    * `r_tail = -log p - H + log(alpha)`
-  * Implements the TACO credit weight:
-
-    * `w = 1` if `r_tail <= 0`
-    * `w = 1 - lambda * (1 - exp(-r_tail))` if `r_tail > 0`
-  * Reweights only tokens with positive sequence-level advantage.
-  * Preserves non-positive advantages unchanged.
-
-* `verl/workers/actor/dp_actor.py`
-
-  * Applies TACO using current-policy `log_prob` and `entropy` before the PPO clipped surrogate update.
-
-* `verl/workers/config/actor.py`
-
-  * Adds TACO-specific actor configuration.
-
-* `verl/trainer/config/actor/actor.yaml`
-
-  * Adds YAML defaults for TACO parameters.
-
-* `run.sh`
-
-  * Provides an example training command with TACO enabled.
+| Parameter     | Description                                                                                              | Default |
+| ------------- | -------------------------------------------------------------------------------------------------------- | ------- |
+| `TACO_ENABLE` | Whether to enable TACO credit calibration                                                                | `true`  |
+| `TACO_ALPHA`  | Tail-risk strictness. Smaller values are more conservative; larger values identify more tokens as risky. | `0.01`  |
+| `TACO_LAMBDA` | Maximum suppression strength for high-risk positive credit.                                              | `0.9`   |
 
 ## 🫡 Acknowledgements
 
