@@ -4,11 +4,9 @@
 </h1>
 <h3><em>Right Answer, Wrong Tokens: Tail-Aware Credit Calibration for RLVR</em></h3>
 <p align="center" style="margin-bottom: 0px;">
-    <!-- TODO: replace "#" with the arXiv link once the paper is public -->
-    <a href="#"><img src="https://img.shields.io/badge/Paper-A42C25?style=for-the-badge&logo=arxiv&logoColor=white" height="24"></a><a href="https://github.com/xiuyilou/TACO"><img src="https://img.shields.io/badge/GitHub-000000?style=for-the-badge&logo=github&logoColor=white" height="24"></a>
+    <a href="https://arxiv.org/abs/2607.07976"><img src="https://img.shields.io/badge/Paper-A42C25?style=for-the-badge&logo=arxiv&logoColor=white" height="24"></a><a href="https://github.com/xiuyilou/TACO"><img src="https://img.shields.io/badge/GitHub-000000?style=for-the-badge&logo=github&logoColor=white" height="24"></a>
 </p>
 <p align="center" style="font-size: 10px;">
-    <a href="#-updates" style="text-decoration: none; font-weight: bold;">🎉 Updates</a> •
     <a href="#-about" style="text-decoration: none; font-weight: bold;">💡 About</a> •
     <a href="#-clone-and-use-taco" style="text-decoration: none; font-weight: bold;">🚀 Clone and Use TACO</a> •
     <a href="#-training-with-taco" style="text-decoration: none; font-weight: bold;">🧪 Training with TACO</a> •
@@ -17,7 +15,6 @@
 </p>
 <!-- TODO: add an overview figure, e.g. <img src="./assets/overview.png" alt="TACO Overview" width="60%"> -->
 </div>
-
 
 ## 💡 About
 
@@ -32,14 +29,12 @@ TACO is a **plug-in** modification of the GRPO/PPO training pipeline in [`verl`]
 
 #### 1\. Environment Setup
 
-<!-- TODO: confirm the install steps and Python version -->
 ```bash
-git clone https://github.com/xiuyilou/TACO.git
-cd TACO
-conda create -n taco python=3.10
-conda activate taco
-pip install -e .
+git clone https://github.com/xiuyilou/TACO.git ~/TACO
+cd ~/TACO
 ```
+
+The repository ships a modified copy of `verl`, which `run.sh` adds to `PYTHONPATH`. Install the dependencies of `verl` in your environment first. `run.sh` expects the repository at `$HOME/TACO`; set `WORKDIR` to use a different location.
 
 #### 2\. Run Example
 
@@ -77,7 +72,7 @@ verl/trainer/config/actor/actor.yaml
 The main implementation modifies the GRPO/PPO training pipeline in `verl`:
 
 * `verl/trainer/ppo/core_algos.py`: computes the tail-risk score and the calibrated advantage.
-* `verl/workers/actor/dp_actor.py`: <!-- TODO: describe what is changed in this file -->
+* `verl/workers/actor/dp_actor.py`: reads `taco_enable`, `taco_alpha`, and `taco_lambda` from the actor config, validates them, and applies the calibration to the advantages during the policy update before the policy loss is computed. It also enables the per-token entropy computation that TACO requires and logs the calibration statistics under `taco/*`.
 
 ## 🔍 How TACO Works
 
@@ -111,11 +106,11 @@ This codebase is built on [verl](https://github.com/volcengine/verl), an open-so
 
 If you find TACO helpful, please cite the paper and star this repo, thanks!
 
-<!-- TODO: fill in the author list and venue once the paper is public -->
 ```bibtex
 @article{lou2026taco,
   title={Right Answer, Wrong Tokens: Tail-Aware Credit Calibration for RLVR},
-  author={TODO},
+  author={Lou, Xiuyi and Xu, Zicheng and Chuang, Yu-Neng and Le, Hoang Anh Duy and Xu, Zhaozhuo and Wang, Guanchu and Braverman, Vladimir},
+  journal={arXiv preprint arXiv:2607.07976},
   year={2026}
 }
 ```
