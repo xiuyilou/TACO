@@ -1,22 +1,89 @@
 <div align="center">
-
-# Successful Trajectories, Overcredited Tokens: Calibrating Positive Updates in Reinforcement Learning with Verifiable Rewards
+<h1 align="center">
+  Tail-Aware Credit Calibration (TACO)
+</h1>
+<h3><em>Right Answer, Wrong Tokens: Tail-Aware Credit Calibration for RLVR</em></h3>
+<p align="center" style="margin-bottom: 0px;">
+    <!-- TODO: replace "#" with the arXiv link once the paper is public -->
+    <a href="#"><img src="https://img.shields.io/badge/Paper-A42C25?style=for-the-badge&logo=arxiv&logoColor=white" height="24"></a><a href="https://github.com/xiuyilou/TACO"><img src="https://img.shields.io/badge/GitHub-000000?style=for-the-badge&logo=github&logoColor=white" height="24"></a>
+</p>
+<p align="center" style="font-size: 10px;">
+    <a href="#-updates" style="text-decoration: none; font-weight: bold;">🎉 Updates</a> •
+    <a href="#-about" style="text-decoration: none; font-weight: bold;">💡 About</a> •
+    <a href="#-clone-and-use-taco" style="text-decoration: none; font-weight: bold;">🚀 Clone and Use TACO</a> •
+    <a href="#-training-with-taco" style="text-decoration: none; font-weight: bold;">🧪 Training with TACO</a> •
+    <a href="#-how-taco-works" style="text-decoration: none; font-weight: bold;">🔍 How TACO Works</a> •
+    <a href="#-citation" style="text-decoration: none; font-weight: bold;">💬 Citation</a>
+</p>
+<!-- TODO: add an overview figure, e.g. <img src="./assets/overview.png" alt="TACO Overview" width="60%"> -->
+</div>
 
 
 ## 💡 About
 
-**TACO (Tail-Aware Credit Calibration)** is a lightweight credit-calibration method for LLM reinforcement learning.
+**Tail-Aware Credit Calibration (TACO)** is a **lightweight** credit-calibration method for LLM reinforcement learning with verifiable rewards (RLVR). GRPO-style methods broadcast a single sequence-level advantage to every token in a rewarded completion, which can reinforce locally erroneous tokens alongside useful ones. By calibrating the positive credit assigned to such tokens, TACO delivers:
 
-GRPO-style methods usually broadcast a sequence-level advantage to every token in a rewarded completion. This can unintentionally reinforce locally implausible low-probability tokens when they appear inside otherwise successful trajectories. TACO mitigates this issue by estimating token-level tail risk from generation-time statistics and softly reducing positive credit for high-risk tokens.
+- **Consistent Performance Gains:** Improves over GRPO-style baselines across four LLMs and eight reasoning benchmarks.
+- **Improved Training Stability:** Supports sustained performance gains in long-horizon RL.
+- **No Extra Supervision:** Requires no token-level error labels; the policy serves as its own reference.
 
+## 🚀 Clone and Use TACO
+TACO is a **plug-in** modification of the GRPO/PPO training pipeline in [`verl`](https://github.com/volcengine/verl).
 
-## 🛠️ Implementation
+#### 1\. Environment Setup
 
-The main implementation modifies the GRPO/PPO training pipeline in `verl`.
+<!-- TODO: confirm the install steps and Python version -->
+```bash
+git clone https://github.com/xiuyilou/TACO.git
+cd TACO
+conda create -n taco python=3.10
+conda activate taco
+pip install -e .
+```
 
-### `verl/trainer/ppo/core_algos.py`
+#### 2\. Run Example
 
-The implementation follows the paper formula:
+TACO is enabled through environment variables before launching training:
+
+```bash
+export TACO_ENABLE=true
+export TACO_ALPHA=0.01
+export TACO_LAMBDA=0.9
+
+bash run.sh
+```
+
+## 🧪 Training with TACO
+
+#### 1\. TACO-specific Parameters
+
+| Parameter     | Description                                                                                              | Default |
+| :------------ | :------------------------------------------------------------------------------------------------------- | :-----: |
+| `TACO_ENABLE` | Whether to enable TACO credit calibration.                                                               | `true`  |
+| `TACO_ALPHA`  | Tail-risk strictness. Smaller values are more conservative; larger values identify more tokens as risky. | `0.01`  |
+| `TACO_LAMBDA` | Maximum suppression strength for high-risk positive credit.                                              | `0.9`   |
+
+#### 2\. Configuration Files
+
+TACO-related options are exposed through:
+
+```text
+verl/workers/config/actor.py
+verl/trainer/config/actor/actor.yaml
+```
+
+#### 3\. Code Structure
+
+The main implementation modifies the GRPO/PPO training pipeline in `verl`:
+
+* `verl/trainer/ppo/core_algos.py`: computes the tail-risk score and the calibrated advantage.
+* `verl/workers/actor/dp_actor.py`: <!-- TODO: describe what is changed in this file -->
+
+## 🔍 How TACO Works
+
+TACO estimates token-level tail risk from generation-time statistics and softly reduces positive credit for high-risk tokens. The design of TACO consists of two steps:
+
+- **Tail-Risk Scoring**: Each sampled token's rarity is assessed relative to the policy's own local expectations, and tokens above the risk threshold receive a soft weight below one.
 
 ```python
 r_tail = -log_p - entropy + log(alpha)
@@ -27,7 +94,7 @@ else:
     w = 1 - lambda_ * (1 - exp(-r_tail))
 ```
 
-TACO only reweights tokens with positive sequence-level advantage:
+- **Positive-Credit Calibration**: Only tokens with positive sequence-level advantage are reweighted; negative advantages are left unchanged.
 
 ```python
 if advantage > 0:
@@ -36,34 +103,19 @@ else:
     calibrated_advantage = advantage
 ```
 
-### `verl/workers/actor/dp_actor.py`
+## 🫡 Acknowledgement
 
+This codebase is built on [verl](https://github.com/volcengine/verl), an open-source RL training library for LLMs.
 
-### Config files
+## 💬 Citation
 
-TACO-related options are exposed through:
+If you find TACO helpful, please cite the paper and star this repo, thanks!
 
-```text
-verl/workers/config/actor.py
-verl/trainer/config/actor/actor.yaml
+<!-- TODO: fill in the author list and venue once the paper is public -->
+```bibtex
+@article{lou2026taco,
+  title={Right Answer, Wrong Tokens: Tail-Aware Credit Calibration for RLVR},
+  author={TODO},
+  year={2026}
+}
 ```
-
-## 🧪 Training with TACO
-
-TACO can be enabled through environment variables before launching training:
-
-```bash
-export TACO_ENABLE=true
-export TACO_ALPHA=0.01
-export TACO_LAMBDA=0.9
-
-bash run.sh
-```
-
-### TACO-specific parameters
-
-| Parameter     | Description                                                                                              | Default |
-| ------------- | -------------------------------------------------------------------------------------------------------- | ------- |
-| `TACO_ENABLE` | Whether to enable TACO credit calibration                                                                | `true`  |
-| `TACO_ALPHA`  | Tail-risk strictness. Smaller values are more conservative; larger values identify more tokens as risky. | `0.01`  |
-| `TACO_LAMBDA` | Maximum suppression strength for high-risk positive credit.                                              | `0.9`   |
